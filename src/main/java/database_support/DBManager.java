@@ -1,20 +1,21 @@
 package database_support;
 
-import model.Examined;
-import model.Flagella;
+import database_support.data_model.Examined;
+import database_support.data_model.Flagella;
+import database_support.data_model.Toughness;
 
 import javax.swing.*;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.List;
 
-class DBManager {
+public class DBManager {
 
     public static Connection connection;
     public static String url = "jdbc:sqlite:";
 
     public DBManager() {
         connect("database/bacteriasDB.db");
-
     }
 
     public void connect(String databaseName) {
@@ -35,6 +36,7 @@ class DBManager {
         String sql = "INSERT INTO examined (genotype,class) values (?,?)";
         Boolean ret = false;
 
+        if(examined.getGenotype() < 1000000 && examined.getClassId().length() < 3){
         try {
             PreparedStatement pStatement = connection.prepareStatement(sql);
             pStatement.setInt(1, examined.getGenotype());
@@ -45,12 +47,13 @@ class DBManager {
             e.printStackTrace();
             JOptionPane.showMessageDialog(null, e.getMessage(), "Examined add error", JOptionPane.ERROR_MESSAGE);
         }
+        }
         return ret;
     }
 
-    public ArrayList<Examined> getAllExamined() {
+    public List<Examined> getAllExamined() {
 
-        ArrayList<Examined> userList = new ArrayList<Examined>();
+        List<Examined> examinedList = new ArrayList<>();
 
         String sql = "SELECT genotype, class FROM EXAMINED";
 
@@ -58,20 +61,46 @@ class DBManager {
             PreparedStatement pStatement = connection.prepareStatement(sql);
             ResultSet resultSet = pStatement.executeQuery();
 
-
             while (resultSet.next()) {
-                userList.add(new Examined(resultSet.getInt("genotype"), resultSet.getString("class")));
+                examinedList.add(new Examined(resultSet.getInt("genotype"), resultSet.getString("class")));
             }
         } catch (SQLException e) {
             e.printStackTrace();
             JOptionPane.showMessageDialog(null, e.getMessage(), "Examined selection error", JOptionPane.ERROR_MESSAGE);
         }
-        return userList;
+        return examinedList;
     }
 
-    public ArrayList<Flagella> getAllFlagella() {
 
-        ArrayList<Flagella> flagellaList = new ArrayList<Flagella>();
+    public boolean removeExamined(int genotype) {
+        String sql = "DELETE FROM examined WHERE genotype = ?";
+        Boolean ret = false;
+        try {
+            PreparedStatement pStatement = connection.prepareStatement(sql);
+            pStatement.setInt(1, genotype);
+            ret = pStatement.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return ret;
+    }
+
+    public boolean removeAllExamined() {
+        String sql = "DELETE FROM examined";
+        Boolean ret = false;
+        try {
+            PreparedStatement pStatement = connection.prepareStatement(sql);
+            ret = pStatement.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return ret;
+    }
+
+
+    public List<Flagella> getAllFlagella() {
+
+        List<Flagella> flagellaList = new ArrayList<>();
 
         String sql = "SELECT alpha, beta, number FROM FLAGELLA";
 
@@ -92,15 +121,39 @@ class DBManager {
         return flagellaList;
     }
 
+    public List<Toughness> getAllToughness() {
 
-    public void updateUser(Examined examined) {
-        String sql = "UPDATE users SET genotype = ? , classId = ?";
+        List<Toughness> toughnessList = new ArrayList<>();
+
+        String sql = "SELECT beta, gamma, rank FROM TOUGHNESS";
+
+        try {
+            PreparedStatement pStatement = connection.prepareStatement(sql);
+            ResultSet resultSet = pStatement.executeQuery();
+
+
+            while (resultSet.next()) {
+                toughnessList.add(new Toughness(resultSet.getInt("beta"),
+                        resultSet.getInt("gamma"),
+                        resultSet.getString("rank")));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(null, e.getMessage(), "Examined selection error", JOptionPane.ERROR_MESSAGE);
+        }
+        return toughnessList;
+    }
+
+
+    public void updateExamined(Examined examined) {
+        String sql = "UPDATE examined SET genotype = ? , class = ?";
         try {
             PreparedStatement pStatement = connection.prepareStatement(sql);
             pStatement.setInt(1, examined.getGenotype());
             pStatement.setString(2, examined.getClassId());
             pStatement.execute();
         } catch (SQLException e) {
+            e.printStackTrace();
             JOptionPane.showMessageDialog(null, e.getMessage(), "Examined update error", JOptionPane.ERROR_MESSAGE);
 
         }
@@ -110,45 +163,21 @@ class DBManager {
         DBManager manager = new DBManager();
 
 //        Adding new records
-//        manager.addExamined(new Examined(123456, "1a"));
-//        manager.addExamined(new Examined(432567, "3b"));
-//        manager.addOrder(new Order(1,"01012018","02012018","Puzon",7,1,"03012018"));
-//        manager.addStorageItem(new StorageItem(1,"Puzon",5));
+        manager.addExamined(new Examined(123456, "1a"));
+        manager.addExamined(new Examined(432567, "3b"));
+
 
 ////        Displaying records
-//        ArrayList<Examined> examined = manager.getAllExamined();
-//        for (int i = 0; i < examined.size(); i++) {
-//            System.out.println(examined.get(i).getGenotype());
-//        }
+        List<Examined> examinedList = manager.getAllExamined();
+        for (Examined examined : examinedList) {
+            System.out.println(examined.getGenotype());
+        }
 
-        ArrayList<Flagella> flagellas = manager.getAllFlagella();
+        List<Flagella> flagellas = manager.getAllFlagella();
         for(Flagella flagella : flagellas){
             System.out.println(flagella.getAlpha());
         }
 
-//        ArrayList<StorageItem> item = manager.getAllStorageItems();
-//        for(int i =0; i< item.size(); i++){
-//            System.out.println(item.get(i).getItem());
-//        }
-//          Removing records
-//        manager.removeUser(1);
-//        manager.removeOrder(1);
-//        manager.removeStorageItem(1);
-//            Displaying records
-//        ArrayList<Examined> examined2 = manager.getAllExamined();
-//        for (int i = 0; i < examined2.size(); i++) {
-//            System.out.println(examined2.get(i).getGenotype());
-//        }
-//
-//        ArrayList<Order> orders2 = manager.getAllOrders();
-//        for(int i =0; i< orders2.size(); i++){
-//            System.out.println(orders2.get(i).getCreationDate());
-//        }
-//
-//        ArrayList<StorageItem> item2 = manager.getAllStorageItems();
-//        for(int i =0; i< item2.size(); i++){
-//            System.out.println(item2.get(i).getItem());
-//        }
     }
 
     public static void main(String[] args) {

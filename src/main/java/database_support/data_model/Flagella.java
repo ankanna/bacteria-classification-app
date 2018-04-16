@@ -1,4 +1,4 @@
-package model;
+package database_support.data_model;
 
 public class Flagella {
 
