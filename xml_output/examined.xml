@@ -3,15 +3,15 @@
     <examinedBacterias>
         <examined>
             <genotype>222222</genotype>
-            <classId>3d</classId>
+            <class>3d</class>
         </examined>
         <examined>
             <genotype>333333</genotype>
-            <classId>3b</classId>
+            <class>3b</class>
         </examined>
         <examined>
             <genotype>999999</genotype>
-            <classId>2a</classId>
+            <class>2a</class>
         </examined>
     </examinedBacterias>
 </ns2:jabXexaminedBacterias>
