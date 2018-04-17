@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ns2:jabXexaminedBacterias xmlns:ns2="appliaction.serialization">
+    <examinedBacterias>
+        <examined>
+            <genotype>222222</genotype>
+            <classId>3d</classId>
+        </examined>
+        <examined>
+            <genotype>333333</genotype>
+            <classId>3b</classId>
+        </examined>
+        <examined>
+            <genotype>999999</genotype>
+            <classId>2a</classId>
+        </examined>
+        <examined>
+            <genotype>234567</genotype>
+            <classId>2a</classId>
+        </examined>
+    </examinedBacterias>
+</ns2:jabXexaminedBacterias>

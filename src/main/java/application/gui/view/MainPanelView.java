@@ -12,7 +12,8 @@ public class MainPanelView {
     private JButton saveButton;
     private JTextField genotypeTextField;
     private JButton classifyButton;
-    private JButton classifyManyBacteriasButton;
+    private JButton classifyManyButton;
+    private JTextField manyGenotypesTextField;
     private DefaultTableModel model;
 
     public MainPanelView(){
@@ -82,14 +83,17 @@ public class MainPanelView {
         this.classifyButton = classifyButton;
     }
 
-    public JButton getClassifyManyBacteriasButton() {
-        return classifyManyBacteriasButton;
+    public JButton getClassifyManyButton() {
+        return classifyManyButton;
     }
 
-    public void setClassifyManyBacteriasButton(JButton classifyManyBacteriasButton) {
-        this.classifyManyBacteriasButton = classifyManyBacteriasButton;
+    public void setClassifyManyButton(JButton classifyManyButton) {
+        this.classifyManyButton = classifyManyButton;
     }
 
+    public JTextField getManyGenotypesTextField() {
+        return manyGenotypesTextField;
+    }
 
     private void createUIComponents() {
 

@@ -5,26 +5,21 @@ import database_support.data_model.Examined;
 import database_support.data_model.Flagella;
 import database_support.data_model.Toughness;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementWrapper;
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.swing.*;
+import java.awt.*;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
 import static java.lang.Integer.parseInt;
 
-@XmlRootElement(namespace = "application.model")
 public class Classifier {
 
-    @XmlElementWrapper(name = "examinedBacterias")
+    private List<Examined> examinedList;
+    private List<Flagella> flagellaList;
+    private List<Toughness> toughnessList;
 
-    List<Flagella> flagellaList;
-    List<Toughness> toughnessList;
-
-    @XmlElement(name = "book")
-    List<Examined> examinedList;
-
-    DBManager dbManager;
+    private static DBManager dbManager;
 
     int alpha;
     int beta;
@@ -34,7 +29,7 @@ public class Classifier {
         dbManager = new DBManager();
     }
 
-    public DBManager getDbManager() {
+    public static DBManager getDbManager() {
         return dbManager;
     }
 
@@ -50,17 +45,37 @@ public class Classifier {
         return examinedList;
     }
 
+    public void setExaminedList(List<Examined> examinedList) {
+        this.examinedList = examinedList;
+    }
+
     public void addToList() {
         flagellaList = dbManager.getAllFlagella();
         toughnessList = dbManager.getAllToughness();
         examinedList = dbManager.getAllExamined();
     }
 
-    public void classifyBacteria(String genotype) {
+    public void classifyMany(List<String> genotypes){
+        try {
+            dbManager.getConnection().setAutoCommit(false);
+            for (String genotype : genotypes) {
+                classifyBacteria(genotype, false);
+            }
+            dbManager.getConnection().commit();
+            dbManager.getConnection().setAutoCommit(true);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+
+    }
+
+
+    public void classifyBacteria(String genotype, boolean singleClassification) {
 
         String classId = classifyFlagella(genotype) + classifyToughness(genotype);
 
-        Examined examined = new Examined(parseInt(genotype), classId);
+        Examined examined = new Examined(genotype, classId);
 
         if (getIndexByGenotype(genotype) < 0) {
             dbManager.addExamined(examined);
@@ -68,31 +83,39 @@ public class Classifier {
         } else {
             dbManager.updateExamined(examined);
             examinedList.set(getIndexByGenotype(genotype), examined);
-
+        }
+        if (singleClassification){
+            JOptionPane.showMessageDialog(new Frame(),
+                    "Bacteria with genotype: " + genotype + " is classified as " + classId );
         }
     }
 
 
     private int classifyFlagella(String genotype) {
 
-        List<Double> distance;
-
-        alpha = parseInt(genotype.substring(0, 1) + genotype.substring(5, 6));
-        beta = parseInt(genotype.substring(1, 2) + genotype.substring(4, 5));
+        List<Double> distance = new ArrayList<>();
 
         flagellaList = dbManager.getAllFlagella();
 
-        distance = flagellaList.stream().map(flagella ->
-        {
+        try{
+        alpha = parseInt(genotype.substring(0, 1) + genotype.substring(5, 6));
+        beta = parseInt(genotype.substring(1, 2) + genotype.substring(4, 5));
+
+
+        distance = flagellaList.stream().map(flagella -> {
             double dist = Math.sqrt(Math.pow(alpha - flagella.getAlpha(), 2)
                     + Math.pow(beta - flagella.getBeta(), 2));
             return dist;
-        })
-                .collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
-
+        }).collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
+            return flagellaList.get(getMinValue(distance)).getNumber();}
+        catch (Exception e){
+            JOptionPane.showMessageDialog(null, "Genotype should contain 6 numbers", "Classify error", JOptionPane.ERROR_MESSAGE);
+        }
 
         return flagellaList.get(getMinValue(distance)).getNumber();
     }
+
+
 
     private String classifyToughness(String genotype) {
 
@@ -103,16 +126,16 @@ public class Classifier {
 
         toughnessList = dbManager.getAllToughness();
 
-        distance = toughnessList.stream().map(flagella ->
-        {
+        distance = toughnessList.stream().map(flagella -> {
             double dist = Math.sqrt(Math.pow(beta - flagella.getBeta(), 2)
                     + Math.pow(gamma - flagella.getGamma(), 2));
             return dist;
-        })
-                .collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
+        }).collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
 
         return toughnessList.get(getMinValue(distance)).getRank();
     }
+
+
 
     private int getMinValue(List<Double> distance) {
 
@@ -124,6 +147,7 @@ public class Classifier {
 
         return minAt;
     }
+
 
 
     private int getIndexByGenotype(String genotype) {

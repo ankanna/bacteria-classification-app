@@ -9,6 +9,8 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.lang.Integer.parseInt;
+
 public class DBManager {
 
     public static Connection connection;
@@ -16,6 +18,10 @@ public class DBManager {
 
     public DBManager() {
         connect("database/bacteriasDB.db");
+    }
+
+    public static Connection getConnection() {
+        return connection;
     }
 
     public void connect(String databaseName) {
@@ -36,17 +42,17 @@ public class DBManager {
         String sql = "INSERT INTO examined (genotype,class) values (?,?)";
         Boolean ret = false;
 
-        if(examined.getGenotype() < 1000000 && examined.getClassId().length() < 3){
-        try {
-            PreparedStatement pStatement = connection.prepareStatement(sql);
-            pStatement.setInt(1, examined.getGenotype());
-            pStatement.setString(2, examined.getClassId());
+        if (parseInt(examined.getGenotype()) < 1000000 && examined.getClassId().length() < 3) {
+            try {
+                PreparedStatement pStatement = connection.prepareStatement(sql);
+                pStatement.setString(1, examined.getGenotype());
+                pStatement.setString(2, examined.getClassId());
 
-            ret = pStatement.execute();
-        } catch (SQLException e) {
-            e.printStackTrace();
-            JOptionPane.showMessageDialog(null, e.getMessage(), "Examined add error", JOptionPane.ERROR_MESSAGE);
-        }
+                ret = pStatement.execute();
+            } catch (SQLException e) {
+                e.printStackTrace();
+                JOptionPane.showMessageDialog(null, e.getMessage(), "Examined add error", JOptionPane.ERROR_MESSAGE);
+            }
         }
         return ret;
     }
@@ -62,7 +68,7 @@ public class DBManager {
             ResultSet resultSet = pStatement.executeQuery();
 
             while (resultSet.next()) {
-                examinedList.add(new Examined(resultSet.getInt("genotype"), resultSet.getString("class")));
+                examinedList.add(new Examined(resultSet.getString("genotype"), resultSet.getString("class")));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -149,7 +155,7 @@ public class DBManager {
         String sql = "UPDATE examined SET genotype = ? , class = ?";
         try {
             PreparedStatement pStatement = connection.prepareStatement(sql);
-            pStatement.setInt(1, examined.getGenotype());
+            pStatement.setString(1, examined.getGenotype());
             pStatement.setString(2, examined.getClassId());
             pStatement.execute();
         } catch (SQLException e) {
@@ -157,31 +163,5 @@ public class DBManager {
             JOptionPane.showMessageDialog(null, e.getMessage(), "Examined update error", JOptionPane.ERROR_MESSAGE);
 
         }
-    }
-
-    public void testMethod() {
-        DBManager manager = new DBManager();
-
-//        Adding new records
-        manager.addExamined(new Examined(123456, "1a"));
-        manager.addExamined(new Examined(432567, "3b"));
-
-
-////        Displaying records
-        List<Examined> examinedList = manager.getAllExamined();
-        for (Examined examined : examinedList) {
-            System.out.println(examined.getGenotype());
-        }
-
-        List<Flagella> flagellas = manager.getAllFlagella();
-        for(Flagella flagella : flagellas){
-            System.out.println(flagella.getAlpha());
-        }
-
-    }
-
-    public static void main(String[] args) {
-        DBManager manager = new DBManager();
-        manager.testMethod();
     }
 }

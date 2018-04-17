@@ -1,26 +1,29 @@
 package database_support.data_model;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlRootElement;
-
-@XmlRootElement(name = "examined")
-@XmlAccessorType(XmlAccessType.FIELD)
 public class Examined {
 
-    int genotype;
+    String genotype;
     String classId;
 
-    public Examined(int genotype, String classId) {
+    public Examined(String genotype, String classId) {
         this.genotype = genotype;
         this.classId = classId;
     }
 
-    public int getGenotype() {
+    private Examined(){
+        this.genotype = null;
+        this.classId = null;
+    }
+
+    private static Examined newInstance(){
+    return new Examined();
+    }
+
+    public String getGenotype() {
         return genotype;
     }
 
-    public void setGenotype(int genotype) {
+    public void setGenotype(String genotype) {
         this.genotype = genotype;
     }
 

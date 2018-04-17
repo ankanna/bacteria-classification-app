@@ -1,12 +1,15 @@
 package application.gui.controller;
 
 import application.gui.view.MainPanelView;
-import database_support.DBManager;
 import application.model.Classifier;
+import application.serialization.JAXBserializer;
 import database_support.data_model.Examined;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import javax.xml.bind.JAXBException;
+import java.util.Arrays;
+import java.util.List;
 
 public class MainPanelController {
 
@@ -15,12 +18,11 @@ public class MainPanelController {
     private JButton refreshButton;
     private JButton saveButton;
     private JTextField genotypeTextField;
+    private JTextField manyGenotypesTextField;
     private JButton classifyButton;
-    private JButton classifyManyBacteriasButton;
+    private JButton classifyManyButton;
     private DefaultTableModel model;
 
-
-    private static DBManager dbManager;
     private Classifier classifier;
 
     public MainPanelController() {
@@ -39,14 +41,17 @@ public class MainPanelController {
         this.refreshButton = mainPanelView.getRefreshButton();
         this.saveButton = mainPanelView.getSaveButton();
         this.genotypeTextField = mainPanelView.getGenotypeTextField();
+        this.manyGenotypesTextField = mainPanelView.getManyGenotypesTextField();
         this.classifyButton = mainPanelView.getClassifyButton();
-        this.classifyManyBacteriasButton = mainPanelView.getClassifyManyBacteriasButton();
+        this.classifyManyButton = mainPanelView.getClassifyManyButton();
         this.model = mainPanelView.getModel();
     }
 
     void initListeners(){
         this.classifyButton.addActionListener(e -> quickClassify());
         this.refreshButton.addActionListener(e -> refreshExamined());
+        this.saveButton.addActionListener(e -> saveToFile());
+        this.classifyManyButton.addActionListener(e -> classifyMany());
 
     }
 
@@ -54,9 +59,9 @@ public class MainPanelController {
         classifier = new Classifier();
         classifier.getDbManager().removeAllExamined();
         classifier.addToList();
-        classifier.classifyBacteria("222222");
-        classifier.classifyBacteria("333333");
-        classifier.classifyBacteria("999999");
+        classifier.classifyBacteria("222222", false);
+        classifier.classifyBacteria("333333", false);
+        classifier.classifyBacteria("999999", false);
 
     }
 
@@ -68,9 +73,27 @@ public class MainPanelController {
     }
 
     void quickClassify(){
-        classifier.classifyBacteria(genotypeTextField.getText());
+        classifier.classifyBacteria(genotypeTextField.getText(), true);
         refreshExamined();
     }
+
+    void saveToFile(){
+        try {
+            JAXBserializer.marshal();
+        } catch (JAXBException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(null, e.getMessage(), "Saving went wrong :(", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    void classifyMany(){
+
+        String genotypes = manyGenotypesTextField.getText();
+        List<String> genotypeList = Arrays.asList(genotypes.split(",[ ]*"));
+        classifier.classifyMany(genotypeList);
+    }
+
+
 
 }
 
