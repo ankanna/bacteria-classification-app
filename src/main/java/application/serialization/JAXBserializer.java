@@ -6,7 +6,9 @@ import database_support.data_model.Examined;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
+import java.awt.*;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,10 +32,28 @@ public class JAXBserializer {
 
         jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
 
-        //Marshal the examined list in console
-        jaxbMarshaller.marshal(jabXexaminedBacterias, System.out);
+
+        File xmlFile = new File("xml_output/examined.xml");
 
         //Marshal the examined list in file
-        jaxbMarshaller.marshal(jabXexaminedBacterias, new File("./examined.xml"));
+        jaxbMarshaller.marshal(jabXexaminedBacterias, xmlFile);
+
+        try {
+            openFile(xmlFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void openFile(File file) throws IOException {
+
+        if(!Desktop.isDesktopSupported()){
+            System.out.println("Desktop is not supported");
+            return;
+        }
+
+        Desktop desktop = Desktop.getDesktop();
+        if(file.exists()) desktop.open(file);
+
     }
 }

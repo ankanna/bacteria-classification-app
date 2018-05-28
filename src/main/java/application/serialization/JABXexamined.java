@@ -2,6 +2,7 @@ package application.serialization;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement(name = "examined")
@@ -9,6 +10,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class JABXexamined {
 
         String genotype;
+
+    @XmlElement(name="class")
         String classId;
 
         public JABXexamined() {
